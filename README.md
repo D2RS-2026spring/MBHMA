@@ -6,6 +6,40 @@
 **原始论文**：Essibu, A. K., et al. (2025). *Contrasting effects of Corn cob and Cocoa pod husk biochars on Heavy metal Bioavailability, Speciation, and Uptake by Maize in a Mining-Contaminated soil*. West African Journal of Applied Ecology.（原文链接：https://doi.org/10.1016/j.heliyon.2020.e05388 ）  
 **数据来源**：Mendeley Data （数据链接：https://data.mendeley.com/datasets/wk8m4t64dh/2 ）
 
+## 仓库结构
+├── Code/ # 所有 R 脚本（按成员分工组织）
+
+│ ├── member1_data_cleaning.R # 数据清洗与探索性分析
+
+│ ├── member2_langmuir.R # Langmuir 模型拟合
+
+│ ├── member3_hill.R # Hill 模型拟合
+
+│ ├── member4_statistical_tests.R# 统计比较（z 检验）
+
+│ └── run_full_analysis.R # 一键运行所有脚本
+
+├── Data/ # 原始数据（只读，不修改）
+
+│ └── allmetals2_isotherm.csv # 吸附等温线数据
+
+├── output/ # 所有生成的结果
+
+├── renv.lock # R 包版本锁定文件（用于完全复现环境）
+
+└── README.md # 项目说明文档（本文件）
+
+## 小组分工
+
+| 成员   | GitHub 用户名 | 负责模块                 | 贡献文件                           |
+|--------|---------------|--------------------------|------------------------------------|
+| 成员1  | @member1      | 数据清洗与探索性分析     | `Code/member1_data_cleaning.R`     |
+| 成员2  | @member2      | Langmuir 模型拟合        | `Code/member2_langmuir.R`          |
+| 成员3  | @member3      | Hill 模型拟合            | `Code/member3_hill.R`              |
+| 成员4  | @member4      | 统计比较（z 检验）       | `Code/member4_statistical_tests.R` |
+| 成员5  | @Fu-cole      | 可视化与报告整合         | `Code/run_full_analysis.R`（以及报告文档） |
+
+
 ## 复现步骤
 
 ### 1. 克隆仓库
