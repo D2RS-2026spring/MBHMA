@@ -1,0 +1,17 @@
+# R session files
+.RData
+.Rhistory
+.Rproj.user
+
+# renv library (restore from lockfile)
+renv/library/
+renv/staging/
+
+# Quarto output
+_book/
+.quarto/
+
+# Generated output (can be regenerated)
+output/*.rds
+output/*.csv
+output/*.png

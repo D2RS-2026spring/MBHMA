@@ -1,0 +1,87 @@
+---
+title: "数据清洗与探索性分析"
+---
+
+## 加载 R 包
+
+```{r}
+#| label: setup
+library(tidyverse)
+library(knitr)
+```
+
+## 读取原始数据
+
+```{r}
+#| label: load-data
+allmetals <- read.csv('Data/Langmuir and Hill isotherms fitting/allmetals2_isotherm.csv')
+cat("原始数据维度:", dim(allmetals), "\n")
+kable(head(allmetals), caption = "原始数据前6行")
+```
+
+## 数据清洗
+
+```{r}
+#| label: clean-data
+# 剔除无效生物炭（SWP550, SWP550AW）
+selmetals <- allmetals[!allmetals$Biochar %in% c("SWP550","SWP550AW"), ]
+cat("剔除SWP550系列后维度:", dim(selmetals), "\n")
+
+# 剔除高浓度异常点（Ce > 50 mg/L）
+selmetals <- selmetals[selmetals$Ce_mg_l < 50, ]
+cat("剔除Ce>50后维度:", dim(selmetals), "\n")
+
+# 将Biochar和Metal列转为因子（去除多余水平）
+selmetals <- droplevels(selmetals)
+```
+
+## 描述性统计
+
+```{r}
+#| label: desc-stats
+desc_stats <- selmetals %>%
+  group_by(Biochar, Metal) %>%
+  summarise(n = n(),
+            Ce_mean = mean(Ce_mg_l),
+            Ce_sd = sd(Ce_mg_l),
+            Qe_mean = mean(Qe_mg_g),
+            Qe_sd = sd(Qe_mg_g),
+            .groups = "drop")
+
+kable(desc_stats, caption = "各生物炭-金属组合的描述性统计")
+```
+
+## 数据可视化
+
+```{r}
+#| label: fig-initial-scatter
+#| fig-cap: "初始吸附等温线数据"
+#| fig-width: 10
+#| fig-height: 6
+ggplot(data=allmetals, aes(x=Ce_mg_l, y=Qe_mg_g, group=interaction(Biochar,Metal))) +
+  theme_bw() +
+  geom_point() +
+  facet_grid(Metal ~ Biochar, scales="free") +
+  labs(title = "原始数据")
+```
+
+```{r}
+#| label: fig-cleaned-scatter
+#| fig-cap: "清洗后的吸附等温线数据"
+#| fig-width: 8
+#| fig-height: 6
+ggplot(selmetals, aes(x=Ce_mg_l, y=Qe_mg_g, color=Metal)) +
+  theme_bw() +
+  geom_point() +
+  facet_wrap(~ Biochar, scales="free") +
+  labs(title = "Cleaned isotherm data")
+```
+
+## 保存中间结果
+
+```{r}
+#| label: save-data
+# 保存清洗后的数据供后续章节使用
+saveRDS(selmetals, "output/selmetals.rds")
+cat("数据已保存到 output/selmetals.rds\n")
+```

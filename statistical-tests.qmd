@@ -1,0 +1,133 @@
+---
+title: "统计比较（z 检验）"
+---
+
+## 加载数据
+
+```{r}
+#| label: load-data
+library(tidyverse)
+library(knitr)
+
+# 加载 Hill 模型参数
+paramsHill <- readRDS("output/paramsHill.rds")
+cat("加载 Hill 参数完成\n")
+cat("参数结构:\n")
+str(paramsHill)
+cat("\n前几行数据:\n")
+print(head(paramsHill))
+```
+
+## 筛选参数 a (Qmax)
+
+```{r}
+#| label: prepare-stat
+# 如果没有 Biochar 和 Metal 列，从 model 列提取
+if (!"Biochar" %in% colnames(paramsHill)) {
+  paramsHill <- paramsHill %>%
+    separate(model, into = c("Biochar", "Metal"), sep = "\\.", remove = FALSE)
+}
+
+params_a <- paramsHill[paramsHill$term == "a", ]
+params_a$estimate <- as.numeric(params_a$estimate)
+params_a$std.error <- as.numeric(params_a$std.error)
+params_a <- params_a[!is.na(params_a$estimate) & !is.na(params_a$std.error), ]
+params_a$Biochar <- as.factor(params_a$Biochar)
+params_a$Metal <- as.factor(params_a$Metal)
+params_a <- droplevels(params_a)
+
+kable(params_a, caption = "Hill 模型参数 a (Qmax)")
+```
+
+## Qmax 比较图
+
+```{r}
+#| label: fig-qmax-comparison
+#| fig-cap: "不同生物炭对三种重金属的最大吸附量比较"
+#| fig-width: 8
+#| fig-height: 6
+ggplot(params_a, aes(x = Biochar, y = estimate, color = Metal)) +
+  geom_point(size = 3, position = position_dodge(0.3)) +
+  geom_errorbar(aes(ymin = estimate - std.error, ymax = estimate + std.error),
+                width = 0.2, position = position_dodge(0.3)) +
+  facet_wrap(~ Metal, scales = "free_y") +
+  theme_bw() +
+  labs(y = bquote('Qmax ('*mg.g^-1*')'),
+       title = "不同生物炭对三种重金属的最大吸附量 (Hill 模型参数 a)") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## 两两 z 检验
+
+```{r}
+#| label: z-test
+pairwise_z_test <- function(df) {
+  biochars <- unique(df$Biochar)
+  if (length(biochars) < 2) return(data.frame())
+  results <- data.frame()
+  for (i in 1:(length(biochars)-1)) {
+    for (j in (i+1):length(biochars)) {
+      sub_i <- df[df$Biochar == biochars[i], ]
+      sub_j <- df[df$Biochar == biochars[j], ]
+      if (nrow(sub_i) == 0 || nrow(sub_j) == 0) next
+      est1 <- sub_i$estimate[1]
+      se1 <- sub_i$std.error[1]
+      est2 <- sub_j$estimate[1]
+      se2 <- sub_j$std.error[1]
+      diff <- est1 - est2
+      se_diff <- sqrt(se1^2 + se2^2)
+      z <- diff / se_diff
+      p_val <- 2 * (1 - pnorm(abs(z)))
+      results <- rbind(results, data.frame(
+        Biochar1 = as.character(biochars[i]),
+        Biochar2 = as.character(biochars[j]),
+        diff = diff,
+        z = z,
+        p_value = p_val
+      ))
+    }
+  }
+  return(results)
+}
+
+# 对每种金属分别进行两两比较
+metal_list <- unique(params_a$Metal)
+all_results <- list()
+for (m in metal_list) {
+  subdf <- params_a[params_a$Metal == m, ]
+  if (nrow(subdf) < 2) next
+  res <- pairwise_z_test(subdf)
+  if (nrow(res) > 0) {
+    res$Metal <- m
+    all_results[[m]] <- res
+  }
+}
+final_results <- bind_rows(all_results)
+
+kable(final_results, caption = "两两 z 检验结果")
+```
+
+## 显著差异结果
+
+```{r}
+#| label: sig-results
+sig_results <- final_results[final_results$p_value < 0.05, ]
+cat("\n=== 显著差异的生物炭对 (p < 0.05) ===\n")
+if (nrow(sig_results) > 0) {
+  kable(sig_results, caption = "显著差异的生物炭对")
+} else {
+  cat("无显著差异。\n")
+}
+```
+
+## 保存最终结果
+
+```{r}
+#| label: save-results
+# 保存所有统计结果
+write.csv(final_results, "output/pairwise_ztest_results.csv", row.names = FALSE)
+if (nrow(sig_results) > 0) {
+  write.csv(sig_results, "output/significant_pairs.csv", row.names = FALSE)
+}
+cat("统计结果已保存到 output/ 目录\n")
+```

@@ -1,0 +1,25 @@
+project:
+  type: book
+  output-dir: _book
+
+execute:
+  echo: false
+  warning: false
+  message: false
+
+book:
+  title: "植物基生物炭对重金属吸附等温线分析复现"
+  author: "D2RS-2026spring 小组作业"
+  date: "2026/5/23"
+  chapters:
+    - index.qmd
+    - data-cleaning.qmd
+    - langmuir-model.qmd
+    - hill-model.qmd
+    - statistical-tests.qmd
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand

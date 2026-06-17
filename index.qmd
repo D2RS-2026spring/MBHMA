@@ -1,0 +1,50 @@
+---
+title: "植物基生物炭对 Cd(II)、Pb(II)、Zn(II) 的吸附等温线分析复现"
+---
+
+## 复现论文
+
+**Essibu, A. K., et al. (2025)**. *Contrasting effects of Corn cob and Cocoa pod husk biochars on Heavy metal Bioavailability, Speciation, and Uptake by Maize in a Mining-Contaminated soil*. West African Journal of Applied Ecology.
+
+**原始论文链接**：https://doi.org/10.1016/j.heliyon.2020.e05388
+
+**数据来源**：Mendeley Data - https://data.mendeley.com/datasets/wk8m4t64dh/2
+
+## 项目目标
+
+复现论文中关于四种植物基生物炭（OSR550、MSP550、MSP700、PKS550）对 Cd(II)、Pb(II)、Zn(II) 吸附等温线的数据分析部分。
+
+## 分析流程
+
+本报告分为以下章节，每个章节对应一个分析步骤：
+
+| 章节 | 内容 | 对应脚本 |
+|------|------|----------|
+| [数据清洗与探索性分析](data-cleaning.qmd) | 数据读取、清洗、描述性统计 | `Code/member1_data_cleaning.R` |
+| [Langmuir 模型拟合](langmuir-model.qmd) | 非线性拟合与残差诊断 | `Code/member2_langmuir.R` |
+| [Hill 模型拟合](hill-model.qmd) | 非线性拟合与模型比较 | `Code/member3_hill.R` |
+| [统计比较](statistical-tests.qmd) | Qmax 两两 z 检验 | `Code/member4_statistical_tests.R` |
+
+## 小组分工
+
+| 成员 | GitHub 用户名 | 负责模块 |
+|------|---------------|----------|
+| 成员1 | @KANGJINGWEN0803 | 数据清洗与探索性分析 |
+| 成员2 | @Xushining1220 | Langmuir 模型拟合 |
+| 成员3 | @cyx-coco | Hill 模型拟合 |
+| 成员4 | @Hackysaw | 统计比较（z 检验） |
+| 成员5 | @Fu-cole | 可视化与报告整合 |
+
+## 复现步骤
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/D2RS-2026spring/MBHMA.git
+cd MBHMA
+
+# 2. 准备R环境（使用 R 4.4.2）
+rig run -r 4.4.2 -e 'renv::restore()'
+
+# 3. 渲染 Quarto 文档
+quarto render
+```
